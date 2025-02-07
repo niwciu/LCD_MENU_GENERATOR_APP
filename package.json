@@ -1,9 +1,9 @@
 {
+  "homepage": "https://niwciu.github.io/LCD_MENU_GENERATOR_APP",
   "name": "lcd-menu-generator",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://niwciu.github.io/LCD_MENU/app/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

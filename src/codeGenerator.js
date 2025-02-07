@@ -104,7 +104,7 @@ export const generateCode = (menuItems, menuDepth, showCallbackName, setCode, se
     // Funkcja do generowania definicji pustych callbacków
     const generateCallbackDefinitions = () => {
       callbackDeclarations.forEach((callbackName) => {
-        generatedCode += `static void ${callbackName}(void) {\n\n}\n\n`;  // Zamieniamy średnik na definicję funkcji z ciałem
+        generatedCode += `static void ${callbackName}(void)\n{\n\n}\n`;  // Zamieniamy średnik na definicję funkcji z ciałem
       });
     };
 
