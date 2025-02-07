@@ -117,10 +117,10 @@ extern "C"
 
 `;const P={},I=y=>{y.forEach(C=>{P[C.displayName]=(P[C.displayName]||0)+1,C.children&&C.children.length>0&&I(C.children)})};I(n);const M={};Object.keys(P).forEach(y=>{if(P[y]>1){const C="LABEL_"+y.toUpperCase().replace(/[ąćęłńóśżźĄĆĘŁŃÓŚŻŹ]/g,U=>({ą:"A",ć:"C",ę:"E",ł:"L",ń:"N",ó:"O",ś:"S",ż:"Z",ź:"Z",Ą:"A",Ć:"C",Ę:"E",Ł:"L",Ń:"N",Ó:"O",Ś:"S",Ż:"Z",Ź:"Z"})[U]||U).replace(/\.(?=\S)/g,"_").replace(/ /g,"_").replace(/[^A-Z0-9_]/g,"").trim();M[y]=C}}),Object.keys(M).forEach(y=>{d+=`static const char ${M[y]}[] = "${y}";
 `});const q=y=>{i&&y.forEach(C=>{C.callbackName&&!F.includes(C.callbackName)&&(F.push(C.callbackName),d+=`static void ${C.callbackName}(void);
-`),C.children&&C.children.length>0&&q(C.children)})},w=()=>{F.forEach(y=>{d+=`static void ${y}(void) {
+`),C.children&&C.children.length>0&&q(C.children)})},w=()=>{F.forEach(y=>{d+=`static void ${y}(void)
+{
 
 }
-
 `})},A=(y,C="",U=1)=>{y.forEach((k,z)=>{const X="  ".repeat(U),ie=C?`${C}_${z+1}`:`menu_${z+1}`;R+=`${X}extern menu_t ${ie};
 `,k.children&&k.children.length>0&&A(k.children,ie,U+1)})},L=(y,C="",U=0)=>{y.forEach((k,z)=>{const X=C?`${C}_${z+1}`:`menu_${z+1}`,ie=z<y.length-1?`${C||"menu"}_${z+2}`:"NULL",de=z>0?`${C||"menu"}_${z}`:"NULL",be=k.children&&k.children.length>0?`${X}_1`:"NULL",he=C||"NULL",fe=k.callbackName?k.callbackName:"NULL",pe=M[k.displayName]?M[k.displayName]:`"${k.displayName}"`,$="  ".repeat(U);d+=`${$}menu_t ${X} = { ${pe}, `,d+=`${ie!=="NULL"?`&${ie}`:"NULL"}, `,d+=`${de!=="NULL"?`&${de}`:"NULL"}, `,d+=`${be!=="NULL"?`&${be}`:"NULL"}, `,d+=`${he!=="NULL"?`&${he}`:"NULL"}, `,d+=`${fe!=="NULL"?fe:"NULL"} };
 `,k.children&&k.children.length>0&&L(k.children,X,de)})};let F=[];d&&(d+=`
