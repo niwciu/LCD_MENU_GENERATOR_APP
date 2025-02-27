@@ -1,11 +1,11 @@
 
 import './App.css';
-import MenuGeneratorApp from './MenuGeneratorApp'; // Importujemy nasz nowy komponent
+import MenuGeneratorApp from './components/MenuGeneratorApp';
 
 function App() {
   return (
     <div className="App">
-      <MenuGeneratorApp /> {/* Wstawiamy nasz komponent */}
+      <MenuGeneratorApp /> 
     </div>
   );
 }

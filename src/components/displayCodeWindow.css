@@ -1,0 +1,63 @@
+/* display-code-window.css */
+.code-window-container {
+    margin-top: 20px;
+    background-color: #282C34;
+    padding: 16px;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.code-window-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.code-window-title {
+    color: #fff;
+    margin: 0;
+    font-size: 16px;
+}
+
+.code-window-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.code-window-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.code-window-content {
+    position: relative;
+    max-height: 300px;
+    overflow-y: hidden;
+}
+
+.code-window-content-expanded {
+    max-height: none;
+    overflow-y: auto;
+}
+
+.code-window-gradient {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(to bottom, rgba(40, 44, 52, 0) 0%, rgba(40, 44, 52, 1) 100%);
+    pointer-events: none;
+}
+
+.code-window-toggle-button {
+    background: none;
+    border: none;
+    color: #4CAF50;
+    cursor: pointer;
+    margin-top: 10px;
+}

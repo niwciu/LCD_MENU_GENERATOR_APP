@@ -1,0 +1,64 @@
+/* menu-item.css */
+.menu-item-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.menu-item-input {
+    font-size: 14px;
+    padding: 5px;
+    flex-grow: 1;
+    margin-right: 10px;
+    border-radius: 4px;
+    width: 150px;
+}
+
+.callback-input {
+    font-size: 13px;
+    padding: 5px;
+    margin-right: 10px;
+    width: 250px;
+    text-align: left;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.callback-input:disabled {
+    background-color: #000000;
+}
+
+.id-input {
+    font-size: 14px;
+    padding: 5px;
+    margin-right: 10px;
+    width: 150px;
+    text-align: left;
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.menu-item-button {
+    padding: 5px 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.move-up-button {
+    margin-right: 5px;
+}
+
+.move-down-button {
+    margin-right: 5px;
+}
+
+.delete-button {
+    margin-left: 5px;
+}
+
+.add-child-button {
+    margin-left: 5px;
+}
