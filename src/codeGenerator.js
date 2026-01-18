@@ -143,7 +143,7 @@ export const generateCode = (menuItems, menuDepth, showCallbackName, setCode, se
         generatedCode += `${callbackValue !== 'NULL' ? callbackValue : 'NULL'} };\n`;
   
         if (item.children && item.children.length > 0) {
-          generateMenuDefinitions(item.children, id, prevId, indentationLevel + 1);
+          generateMenuDefinitions(item.children, id, indentationLevel + 1);
         }
       });
     };

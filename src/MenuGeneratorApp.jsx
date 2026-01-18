@@ -30,10 +30,6 @@ const MenuGeneratorApp = () => {
     setShowCallbackName(prevState => !prevState);
   };
 
-  const handleGenerateCode = () => {
-    generateCode(menuItems, menuDepth, showCallbackName, setCode, setHeaderCode);
-  };
-
   const handleCallbackChange = (id, callbackName) => {
     const updatedMenuItems = updateCallbackRecursively(menuItems, id, callbackName);
     setMenuItems(updatedMenuItems);
@@ -48,7 +44,7 @@ const MenuGeneratorApp = () => {
     const newItem = { id: `menu_${idCounter}`, displayName: `menu_${idCounter}`, level: 0, children: [] };
     const updatedItems = [...menuItems, newItem];
     setMenuItems(updatedItems);
-    setIdCounter(idCounter + 1);
+    setIdCounter((prevCounter) => prevCounter + 1);
     setMenuDepth(recalcDepth(updatedItems));
   };
 
@@ -93,7 +89,8 @@ const MenuGeneratorApp = () => {
   const addChildMenuItem = (parentId) => {
     const parentItem = findItemById(menuItems, parentId);
     if (parentItem) {
-      const childId = `${parentItem.id}_${parentItem.children.length + 1}`;
+      const existingChildren = parentItem.children ?? [];
+      const childId = `${parentItem.id}_${existingChildren.length + 1}`;
       const childItem = { id: childId, displayName: childId, level: parentItem.level + 1, children: [] };
       const updatedItems = addItem(menuItems, parentId, childItem);
       setMenuItems(updatedItems);
@@ -108,15 +105,18 @@ const MenuGeneratorApp = () => {
       return items.map((item, index) => {
         const newId = parentId ? `${parentId}_${index + 1}` : `menu_${counter++}`;
         const updatedItem = { ...item, id: newId };
-        if (updatedItem.children && updatedItem.children.length > 0) {
-          updatedItem.children = updateIdsRecursively(updatedItem.children, newId);
+        const children = item.children ?? [];
+        if (children.length > 0) {
+          updatedItem.children = updateIdsRecursively(children, newId);
         }
-        handleGenerateCode();
         return updatedItem;
       });
     };
     const updatedMenuItems = updateIdsRecursively(menuItems);
     setMenuItems(updatedMenuItems);
+    setMenuDepth(recalcDepth(updatedMenuItems));
+    setIdCounter(getMaxIdFromItems(updatedMenuItems) + 1);
+    generateCode(updatedMenuItems, recalcDepth(updatedMenuItems), showCallbackName, setCode, setHeaderCode);
   };
 
   // Funkcja rekurencyjna do renderowania elementów menu
@@ -193,7 +193,7 @@ const MenuGeneratorApp = () => {
             </button>
             {/* Przycisk wczytywania */}
             <input type="file" onChange={(e) => loadMenuFromFile(e, setMenuItems, setShowCallbackName, setMenuDepth, setIdCounter, calculateDepth, getMaxIdFromItems)} style={{ display: 'none' }} id="file-input" />
-            <button onClick={() => document.getElementById('file-input').click()} 
+            <button onClick={() => document.getElementById('file-input')?.click()} 
               style={{
                 padding: '5px 10px',
                 fontSize: '20px',

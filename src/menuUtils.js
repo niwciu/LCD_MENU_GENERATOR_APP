@@ -53,12 +53,13 @@ export const updateCallbackRecursively = (items, id, callbackName) => {
     return newItems;
   };
   
-  export const moveItemWithParent = (items, id, parentId, direction) => {
+export const moveItemWithParent = (items, id, parentId, direction) => {
     return items.map(item => {
       if (item.id === parentId) {
-        const index = item.children.findIndex(child => child.id === id);
+        const children = item.children ?? [];
+        const index = children.findIndex(child => child.id === id);
         if (index === -1) return item;
-        const newChildren = [...item.children];
+        const newChildren = [...children];
         if (direction === 'up' && index > 0) {
           const [movedItem] = newChildren.splice(index, 1);
           newChildren.splice(index - 1, 0, movedItem);
@@ -76,26 +77,27 @@ export const updateCallbackRecursively = (items, id, callbackName) => {
   };
   
   export const deleteItem = (items, id, parentId) => {
-    return items.filter(item => {
-      // Jeśli parentId jest null, usuwamy element z głównej listy
-      if (parentId === null) {
-        return item.id !== id;
-      }
-      // Jeśli element należy do danego rodzica, usuwamy go z jego dzieci
+    if (parentId === null) {
+      return items.filter(item => item.id !== id);
+    }
+
+    return items.map(item => {
       if (item.id === parentId) {
-        item.children = item.children.filter(child => child.id !== id);
+        const children = item.children ?? [];
+        return { ...item, children: children.filter(child => child.id !== id) };
       }
       if (item.children && item.children.length > 0) {
-        item.children = deleteItem(item.children, id, parentId);
+        return { ...item, children: deleteItem(item.children, id, parentId) };
       }
-      return true;
+      return item;
     });
   };
   
   export const addItem = (items, parentId, newItem) => {
     return items.map(item => {
       if (item.id === parentId) {
-        return { ...item, children: [...item.children, newItem] };
+        const children = item.children ?? [];
+        return { ...item, children: [...children, newItem] };
       }
       if (item.children && item.children.length > 0) {
         return { ...item, children: addItem(item.children, parentId, newItem) };
@@ -119,7 +121,9 @@ export const updateCallbackRecursively = (items, id, callbackName) => {
     let maxId = 0;
     items.forEach(item => {
       const numericId = parseInt(item.id.split('_')[1], 10);
-      maxId = Math.max(maxId, numericId);
+      if (!Number.isNaN(numericId)) {
+        maxId = Math.max(maxId, numericId);
+      }
       if (item.children && item.children.length > 0) {
         maxId = Math.max(maxId, getMaxIdFromItems(item.children));
       }

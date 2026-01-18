@@ -21,23 +21,37 @@ export const saveMenuToFile = (menuItems, showCallbackName) => {
   };
   
   export const loadMenuFromFile = (event, setMenuItems, setShowCallbackName, setMenuDepth, setIdCounter, calculateDepth, getMaxIdFromItems) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
+    const file = event.target?.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
         const data = JSON.parse(reader.result);
+        const menuItems = Array.isArray(data?.menuItems) ? data.menuItems : [];
+        const showCallbackName = Boolean(data?.showCallbackName);
+
         // Ustawienie menu
-        setMenuItems(data.menuItems);
+        setMenuItems(menuItems);
         // Ustawienie stanu dla showCallbackName
-        setShowCallbackName(data.showCallbackName);
+        setShowCallbackName(showCallbackName);
         // Obliczanie głębokości po załadowaniu menu z pliku
-        const depth = calculateDepth(data.menuItems);
+        const depth = calculateDepth(menuItems);
         setMenuDepth(depth);
         // Znalezienie najwyższego ID w strukturze
-        const maxId = getMaxIdFromItems(data.menuItems);
+        const maxId = getMaxIdFromItems(menuItems);
         setIdCounter(maxId + 1);
-      };
-      reader.readAsText(file);
-    }
+      } catch (error) {
+        console.error('Nie udało się wczytać pliku JSON:', error);
+        alert("Nieprawidłowy format pliku JSON.");
+      } finally {
+        if (event.target) {
+          event.target.value = '';
+        }
+      }
+    };
+    reader.readAsText(file);
   };
   

@@ -2,7 +2,8 @@ import PropTypes from "prop-types";
 import { FaArrowUp, FaArrowDown, FaTrash, FaPlus } from 'react-icons/fa';
 
 const MenuItem = ({ item, onRename, onMoveUp, onMoveDown, onDelete, onAddChild, showCallbackName, parentId, onUpdateCallback }) => {
-  const isEditable = item.children.length === 0; // Jeśli obiekt nie ma dzieci, pole jest edytowalne
+  const children = item.children ?? [];
+  const isEditable = children.length === 0; // Jeśli obiekt nie ma dzieci, pole jest edytowalne
 
   // Obsługa zmiany callbacka
   const handleCallbackChange = (e) => {
@@ -125,7 +126,7 @@ const MenuItem = ({ item, onRename, onMoveUp, onMoveDown, onDelete, onAddChild, 
 
 MenuItem.propTypes = {
   item: PropTypes.shape({
-    id: PropTypes.number.isRequired,
+    id: PropTypes.string.isRequired,
     displayName: PropTypes.string.isRequired,
     level: PropTypes.number,
     callbackName: PropTypes.string,
@@ -137,7 +138,7 @@ MenuItem.propTypes = {
   onDelete: PropTypes.func.isRequired,
   onAddChild: PropTypes.func.isRequired,
   showCallbackName: PropTypes.bool,
-  parentId: PropTypes.number,
+  parentId: PropTypes.string,
   onUpdateCallback: PropTypes.func.isRequired
 };
 
