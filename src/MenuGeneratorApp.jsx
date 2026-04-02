@@ -1,5 +1,5 @@
 // MenuGeneratorApp.jsx
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { FaSave, FaFolderOpen, FaPlus, FaEdit } from 'react-icons/fa';
 import DisplayCodeWindow from './displayCodeWindow';
 import MenuItem from './menuItem';
@@ -22,17 +22,26 @@ const MenuGeneratorApp = () => {
   const [idCounter, setIdCounter] = useState(1);  // Licznik dla unikalnych ID
   const [menuDepth, setMenuDepth] = useState(0); // Głębokość menu
   const [showCallbackName, setShowCallbackName] = useState(false); // Stan dla globalnego checkboxa
+  const [useLabelConstantsForAll, setUseLabelConstantsForAll] = useState(false); // Stałe LABEL_xxx dla wszystkich etykiet
   const [code, setCode] = useState(""); // Przykładowy kod w C
   const [menuHeaderCode, setHeaderCode] = useState(""); // Przykładowy kod w C
   
-  // Funkcja do zmiany stanu checkboxa
+  // Funkcje do zmiany stanu checkboxów
   const toggleCallbackNameVisibility = () => {
     setShowCallbackName(prevState => !prevState);
   };
 
-  const handleGenerateCode = () => {
-    generateCode(menuItems, menuDepth, showCallbackName, setCode, setHeaderCode);
+  const toggleUseLabelConstantsForAll = () => {
+    setUseLabelConstantsForAll(prevState => !prevState);
   };
+
+  const handleGenerateCode = useCallback(() => {
+    generateCode(menuItems, menuDepth, showCallbackName, useLabelConstantsForAll, setCode, setHeaderCode);
+  }, [menuItems, menuDepth, showCallbackName, useLabelConstantsForAll]);
+
+  useEffect(() => {
+    handleGenerateCode();
+  }, [handleGenerateCode]);
 
   const handleCallbackChange = (id, callbackName) => {
     const updatedMenuItems = updateCallbackRecursively(menuItems, id, callbackName);
@@ -48,7 +57,7 @@ const MenuGeneratorApp = () => {
     const newItem = { id: `menu_${idCounter}`, displayName: `menu_${idCounter}`, level: 0, children: [] };
     const updatedItems = [...menuItems, newItem];
     setMenuItems(updatedItems);
-    setIdCounter(idCounter + 1);
+    setIdCounter(prevCounter => prevCounter + 1);
     setMenuDepth(recalcDepth(updatedItems));
   };
 
@@ -93,7 +102,8 @@ const MenuGeneratorApp = () => {
   const addChildMenuItem = (parentId) => {
     const parentItem = findItemById(menuItems, parentId);
     if (parentItem) {
-      const childId = `${parentItem.id}_${parentItem.children.length + 1}`;
+      const existingChildren = parentItem.children ?? [];
+      const childId = `${parentItem.id}_${existingChildren.length + 1}`;
       const childItem = { id: childId, displayName: childId, level: parentItem.level + 1, children: [] };
       const updatedItems = addItem(menuItems, parentId, childItem);
       setMenuItems(updatedItems);
@@ -108,15 +118,20 @@ const MenuGeneratorApp = () => {
       return items.map((item, index) => {
         const newId = parentId ? `${parentId}_${index + 1}` : `menu_${counter++}`;
         const updatedItem = { ...item, id: newId };
-        if (updatedItem.children && updatedItem.children.length > 0) {
-          updatedItem.children = updateIdsRecursively(updatedItem.children, newId);
+        const children = item.children ?? [];
+        if (children.length > 0) {
+          updatedItem.children = updateIdsRecursively(children, newId);
         }
-        handleGenerateCode();
         return updatedItem;
       });
     };
     const updatedMenuItems = updateIdsRecursively(menuItems);
     setMenuItems(updatedMenuItems);
+    const newDepth = recalcDepth(updatedMenuItems);
+    setMenuDepth(newDepth);
+    const newMaxId = getMaxIdFromItems(updatedMenuItems);
+    setIdCounter(newMaxId + 1);
+    generateCode(updatedMenuItems, newDepth, showCallbackName, useLabelConstantsForAll, setCode, setHeaderCode);
   };
 
   // Funkcja rekurencyjna do renderowania elementów menu
@@ -178,7 +193,7 @@ const MenuGeneratorApp = () => {
           </div>
           {/* Przycisk zapisu */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <button onClick={() => saveMenuToFile(menuItems, showCallbackName)} 
+            <button onClick={() => saveMenuToFile(menuItems, showCallbackName, useLabelConstantsForAll)} 
               style={{
                 padding: '5px 10px',
                 fontSize: '20px',
@@ -192,8 +207,8 @@ const MenuGeneratorApp = () => {
               <FaSave />
             </button>
             {/* Przycisk wczytywania */}
-            <input type="file" onChange={(e) => loadMenuFromFile(e, setMenuItems, setShowCallbackName, setMenuDepth, setIdCounter, calculateDepth, getMaxIdFromItems)} style={{ display: 'none' }} id="file-input" />
-            <button onClick={() => document.getElementById('file-input').click()} 
+            <input type="file" onChange={(e) => loadMenuFromFile(e, setMenuItems, setShowCallbackName, setUseLabelConstantsForAll, setMenuDepth, setIdCounter, calculateDepth, getMaxIdFromItems)} style={{ display: 'none' }} id="file-input" />
+            <button onClick={() => document.getElementById('file-input')?.click()} 
               style={{
                 padding: '5px 10px',
                 fontSize: '20px',
@@ -226,6 +241,12 @@ const MenuGeneratorApp = () => {
             <input type="checkbox" checked={showCallbackName} onChange={toggleCallbackNameVisibility} id="callback-toggle" />
             <label htmlFor="callback-toggle" style={{ marginLeft: '5px' }}>
               Enable menu items execute callback generation
+            </label>
+          </div>
+          <div style={{ paddingLeft: '20px' }}>
+            <input type="checkbox" checked={useLabelConstantsForAll} onChange={toggleUseLabelConstantsForAll} id="label-constants-toggle" />
+            <label htmlFor="label-constants-toggle" style={{ marginLeft: '5px' }}>
+              Use `static const char` definitions for all labels
             </label>
           </div>
         </div>

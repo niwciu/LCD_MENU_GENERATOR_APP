@@ -1,10 +1,11 @@
 // fileUtils.js
 // This module contains functions for saving and loading the menu structure to/from a file.
 
-export const saveMenuToFile = (menuItems, showCallbackName) => {
+export const saveMenuToFile = (menuItems, showCallbackName, useLabelConstantsForAll) => {
     const dataToSave = {
       menuItems: menuItems,
-      showCallbackName: showCallbackName // Dodajemy stan showCallbackName do danych
+      showCallbackName: showCallbackName, // Dodajemy stan showCallbackName do danych
+      useLabelConstantsForAll: useLabelConstantsForAll // Dodajemy stan useLabelConstantsForAll do danych
     };
     const blob = new Blob([JSON.stringify(dataToSave)], { type: 'application/json' });
     const fileName = prompt("Podaj nazwę pliku:", "menu_structure.json");
@@ -20,24 +21,38 @@ export const saveMenuToFile = (menuItems, showCallbackName) => {
     URL.revokeObjectURL(url);
   };
   
-  export const loadMenuFromFile = (event, setMenuItems, setShowCallbackName, setMenuDepth, setIdCounter, calculateDepth, getMaxIdFromItems) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const data = JSON.parse(reader.result);
-        // Ustawienie menu
-        setMenuItems(data.menuItems);
-        // Ustawienie stanu dla showCallbackName
-        setShowCallbackName(data.showCallbackName);
-        // Obliczanie głębokości po załadowaniu menu z pliku
-        const depth = calculateDepth(data.menuItems);
-        setMenuDepth(depth);
-        // Znalezienie najwyższego ID w strukturze
-        const maxId = getMaxIdFromItems(data.menuItems);
-        setIdCounter(maxId + 1);
-      };
-      reader.readAsText(file);
+  export const loadMenuFromFile = (event, setMenuItems, setShowCallbackName, setUseLabelConstantsForAll, setMenuDepth, setIdCounter, calculateDepth, getMaxIdFromItems) => {
+    const file = event.target?.files?.[0];
+    if (!file) {
+      return;
     }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        const menuItems = Array.isArray(data?.menuItems) ? data.menuItems : [];
+        const showCallbackName = Boolean(data?.showCallbackName);
+        const useConstants = Boolean(data?.useLabelConstantsForAll);
+
+        setMenuItems(menuItems);
+        setShowCallbackName(showCallbackName);
+        setUseLabelConstantsForAll(useConstants);
+
+        const depth = calculateDepth(menuItems);
+        setMenuDepth(depth);
+
+        const maxId = getMaxIdFromItems(menuItems);
+        setIdCounter(maxId + 1);
+      } catch (error) {
+        console.error('Unable to load menu: invalid file format', error);
+        alert('Unable to load menu: invalid file format.');
+      } finally {
+        if (event.target) {
+          event.target.value = '';
+        }
+      }
+    };
+    reader.readAsText(file);
   };
   

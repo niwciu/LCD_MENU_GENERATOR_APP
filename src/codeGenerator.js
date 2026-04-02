@@ -1,7 +1,7 @@
 // codeGenerator.js
 // This module generates C code based on the menu structure.
 
-export const generateCode = (menuItems, menuDepth, showCallbackName, setCode, setHeaderCode) => {
+export const generateCode = (menuItems, menuDepth, showCallbackName, useLabelConstantsForAll, setCode, setHeaderCode) => {
     let generatedCode = '';
     const currentDate = new Date();
     const currentDateString = currentDate.toISOString().split('T')[0];
@@ -48,7 +48,28 @@ export const generateCode = (menuItems, menuDepth, showCallbackName, setCode, se
   
     generatedCode = menuCFileStartContent;
   
-    // Krok 1: Zliczanie wystąpień label
+    // Pomocniczne funkcje do generowania definicji label constant
+    const sanitizeLabel = (label) => {
+      return label
+        .toUpperCase()
+        .replace(/[ąćęłńóśżźĄĆĘŁŃÓŚŻŹ]/g, (match) => {
+          const map = {
+            'ą': 'A', 'ć': 'C', 'ę': 'E', 'ł': 'L', 'ń': 'N', 'ó': 'O', 'ś': 'S', 'ż': 'Z', 'ź': 'Z',
+            'Ą': 'A', 'Ć': 'C', 'Ę': 'E', 'Ł': 'L', 'Ń': 'N', 'Ó': 'O', 'Ś': 'S', 'Ż': 'Z', 'Ź': 'Z'
+          };
+          return map[match] || match;
+        })
+        .replace(/\.(?=\S)/g, '_')
+        .replace(/ /g, '_')
+        .replace(/[^A-Z0-9_]/g, '')
+        .trim();
+    };
+
+    const buildLabelConstantName = (label) => {
+      const sanitized = sanitizeLabel(label);
+      return `LABEL_${sanitized}`;
+    };
+
     const labelCounts = {};
     const countLabels = (items) => {
       items.forEach(item => {
@@ -59,27 +80,18 @@ export const generateCode = (menuItems, menuDepth, showCallbackName, setCode, se
       });
     };
     countLabels(menuItems);
-  
-    // Krok 2: Generowanie nazw stałych dla etykiet
-    const labelConstants = {};
-    Object.keys(labelCounts).forEach(label => {
-      if (labelCounts[label] > 1) {
-        const constantName = 'LABEL_' + label
-          .toUpperCase()
-          .replace(/[ąćęłńóśżźĄĆĘŁŃÓŚŻŹ]/g, (match) => {
-            const map = {
-              'ą': 'A', 'ć': 'C', 'ę': 'E', 'ł': 'L', 'ń': 'N', 'ó': 'O', 'ś': 'S', 'ż': 'Z', 'ź': 'Z',
-              'Ą': 'A', 'Ć': 'C', 'Ę': 'E', 'Ł': 'L', 'Ń': 'N', 'Ó': 'O', 'Ś': 'S', 'Ż': 'Z', 'Ź': 'Z'
-            };
-            return map[match] || match;
-          })
-          .replace(/\.(?=\S)/g, '_')
-          .replace(/ /g, '_')
-          .replace(/[^A-Z0-9_]/g, '')
-          .trim();
-        labelConstants[label] = constantName;
-      }
-    });
+
+    const generateLabelConstants = (counts, all) => {
+      const constants = {};
+      Object.keys(counts).forEach(label => {
+        if (counts[label] > 1 || all) {
+          constants[label] = buildLabelConstantName(label);
+        }
+      });
+      return constants;
+    };
+
+    const labelConstants = generateLabelConstants(labelCounts, useLabelConstantsForAll);
   
     // Krok 3: Generowanie globalnych definicji etykiet
     Object.keys(labelConstants).forEach(label => {
@@ -143,7 +155,7 @@ export const generateCode = (menuItems, menuDepth, showCallbackName, setCode, se
         generatedCode += `${callbackValue !== 'NULL' ? callbackValue : 'NULL'} };\n`;
   
         if (item.children && item.children.length > 0) {
-          generateMenuDefinitions(item.children, id, prevId, indentationLevel + 1);
+          generateMenuDefinitions(item.children, id, indentationLevel + 1);
         }
       });
     };

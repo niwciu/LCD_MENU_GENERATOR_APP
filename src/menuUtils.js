@@ -76,19 +76,29 @@ export const updateCallbackRecursively = (items, id, callbackName) => {
   };
   
   export const deleteItem = (items, id, parentId) => {
-    return items.filter(item => {
-      // Jeśli parentId jest null, usuwamy element z głównej listy
-      if (parentId === null) {
-        return item.id !== id;
-      }
-      // Jeśli element należy do danego rodzica, usuwamy go z jego dzieci
+    if (parentId === null) {
+      return items.filter(item => item.id !== id);
+    }
+
+    return items.map(item => {
       if (item.id === parentId) {
-        item.children = item.children.filter(child => child.id !== id);
+        const childFiltered = item.children
+          ? item.children.filter(child => child.id !== id)
+          : [];
+        return {
+          ...item,
+          children: childFiltered,
+        };
       }
+
       if (item.children && item.children.length > 0) {
-        item.children = deleteItem(item.children, id, parentId);
+        return {
+          ...item,
+          children: deleteItem(item.children, id, parentId),
+        };
       }
-      return true;
+
+      return item;
     });
   };
   

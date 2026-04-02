@@ -13,6 +13,9 @@ const DisplayCodeWindow = ({ code, fileName }) => {
     navigator.clipboard.writeText(code).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }).catch((error) => {
+      console.error('Failed to copy code:', error);
+      alert('Unable to copy code to clipboard.');
     });
   };
 
@@ -31,9 +34,11 @@ const DisplayCodeWindow = ({ code, fileName }) => {
   const handleDownloadFile = () => {
     const blob = new Blob([code], { type: 'text/plain' });
     const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
+    link.href = url;
     link.download = fileName;
     link.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
