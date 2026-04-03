@@ -7,7 +7,7 @@ export const saveMenuToFile = (menuItems, showCallbackName, useLabelConstantsFor
       showCallbackName: showCallbackName, // Dodajemy stan showCallbackName do danych
       useLabelConstantsForAll: useLabelConstantsForAll // Dodajemy stan useLabelConstantsForAll do danych
     };
-    const blob = new Blob([JSON.stringify(dataToSave)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(dataToSave, null, 2)], { type: 'application/json' });
     const fileName = prompt("Podaj nazwę pliku:", "menu_structure.json");
     if (!fileName) {
       alert("Nazwa pliku jest wymagana!");
